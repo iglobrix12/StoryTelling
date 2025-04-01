@@ -1,0 +1,19 @@
+modLoader = "javafml"
+loaderVersion = "[43,)"
+license = "All rights reserved"
+
+[[mods]]
+modId = "storytelling"
+displayName = "StoryTeling"
+authors = "iglobrix12"
+description = '''StoryTelling'''
+
+[[dependencies.storytelling]]
+modId = "forge"
+versionRange = "[43.5.0,)"
+mandatory = true
+
+[[dependencies.storytelling]]
+modId = "minecraft"
+versionRange = "[1.19.2]"
+mandatory = true
