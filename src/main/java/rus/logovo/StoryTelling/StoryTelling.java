@@ -7,11 +7,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Cow;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.checkerframework.checker.units.qual.C;
 import rus.logovo.StoryTelling.Dialog.Dialog;
 import rus.logovo.StoryTelling.Dialog.Rest;
 import rus.logovo.StoryTelling.Function.StoryFunction;
@@ -51,8 +54,13 @@ public class StoryTelling {
         @SubscribeEvent
         public static void onPlayerJoin(BlockEvent.BreakEvent event) {
             serverPlayer = (ServerPlayer) event.getPlayer();
-            Hero hero = new Hero(new Cow(EntityType.COW,serverPlayer.level),new BlockPos(0,-60,0));
-            hero.moveTo(new Vector3d(10,-60,10),1,1);
+            Dialog dialog = new Dialog("Hello",new Rest[] {
+                    new Rest("Yes",() -> {
+                    })
+            });
+            Zombie cow = new Zombie(EntityType.ZOMBIE,serverPlayer.level);
+            cow.moveTo(new Vec3(0,-60,0));
+            dialog.show(cow);
         }
     }
 }

@@ -1,6 +1,7 @@
 package rus.logovo.StoryTelling.Dialog;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.Entity;
 
 public class Dialog {
     private final String question;
@@ -11,9 +12,9 @@ public class Dialog {
         this.options = options;
     }
 
-    public void show() {
+    public void show(Entity entity) {
         Minecraft.getInstance().tell(() -> {
-            Minecraft.getInstance().setScreen(new DialogGUI(question, options));
+            Minecraft.getInstance().setScreen(new DialogGUI(question, options,entity));
         });
     }
 }
