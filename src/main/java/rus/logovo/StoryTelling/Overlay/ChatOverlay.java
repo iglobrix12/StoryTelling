@@ -2,8 +2,10 @@ package rus.logovo.StoryTelling.Overlay;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
@@ -16,29 +18,32 @@ import rus.logovo.StoryTelling.StoryTelling;
 import java.util.LinkedList;
 import java.util.Queue;
 
-@Mod.EventBusSubscriber
+@Mod.EventBusSubscriber(modid = StoryTelling.MODID)
 public class ChatOverlay {
     private static final Queue<ChatMessage> messageQueue = new LinkedList<>();
     private static ChatMessage currentMessage = null;
     private static int displayTicks = 0;
-    private static final int DISPLAY_TIME = 40;
+    private static final int DISPLAY_TIME = 100;
     private static final int AVATAR_SIZE = 32;
     private static final ResourceLocation BACKGROUND_TEXTURE =
             new ResourceLocation(StoryTelling.MODID, "textures/uu/uu.png");
-    public static void addChatMessage(String avatar, String name, int color, String text) {
+
+    public static void addChatMessage(String avatar, String name, ChatFormatting chatFormatting, String text) {
         if (avatar.equals("default")) {
             avatar = "storytelling:textures/uu/uu.png";
         }
 
-        Component formattedName = Component.literal("[" + name + "]: ")
-                .withStyle(style -> style.withColor(TextColor.fromRgb(color)).withBold(true));
+        MutableComponent formattedName = Component.literal("[" + name + "]: ")
+                .withStyle(style -> style.withColor(chatFormatting.getColor()));
 
-        Component message = Component.literal(text)
-                .withStyle(style -> style.withColor(TextColor.fromRgb(0xFFFFFF)));
+        MutableComponent messageText = Component.literal(text)
+                .withStyle(style -> style.withColor(0xFFFFFF));
+
+        Component fullMessage = formattedName.append(messageText);
 
         messageQueue.add(new ChatMessage(
                 new ResourceLocation(avatar),
-                Component.empty().append(formattedName).append(message)
+                fullMessage
         ));
     }
 
@@ -50,23 +55,20 @@ public class ChatOverlay {
                 displayTicks = DISPLAY_TIME;
             }
 
-            if (currentMessage != null) {
-                displayTicks--;
-                if (displayTicks <= 0) {
-                    currentMessage = null;
-                }
+            if (currentMessage != null && displayTicks-- <= 0) {
+                currentMessage = null;
             }
         }
     }
 
     @SubscribeEvent
-    public static void onRenderOverlay(RenderGuiOverlayEvent event) {
+    public static void onRenderOverlay(RenderGuiOverlayEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || currentMessage == null || displayTicks <= 0) return;
+        if (currentMessage == null || displayTicks <= 0) return;
 
         PoseStack poseStack = event.getPoseStack();
-        int screenWidth = event.getWindow().getGuiScaledWidth();
-        int screenHeight = event.getWindow().getGuiScaledHeight();
+        int screenWidth = mc.getWindow().getGuiScaledWidth();
+        int screenHeight = mc.getWindow().getGuiScaledHeight();
 
         int textWidth = mc.font.width(currentMessage.text);
         int boxWidth = textWidth + AVATAR_SIZE + 40;
@@ -77,8 +79,6 @@ public class ChatOverlay {
         RenderSystem.enableBlend();
         RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
         Gui.blit(poseStack, startX, startY, 0, 0, boxWidth, boxHeight, boxWidth, boxHeight);
-
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         if (currentMessage.avatar != null) {
             RenderSystem.setShaderTexture(0, currentMessage.avatar);
