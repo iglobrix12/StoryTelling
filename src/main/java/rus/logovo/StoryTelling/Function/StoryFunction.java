@@ -1,11 +1,14 @@
 package rus.logovo.StoryTelling.Function;
 
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static rus.logovo.StoryTelling.StoryTelling.serverPlayer;
 
 public class StoryFunction {
     private static class TimedScene {
@@ -51,5 +54,8 @@ public class StoryFunction {
             currentTick = 0;
             currentSceneIndex++;
         }
+    }
+    public static void send(String name,String text) {
+        serverPlayer.sendSystemMessage(Component.literal("[" + name + "] " + text));
     }
 }
