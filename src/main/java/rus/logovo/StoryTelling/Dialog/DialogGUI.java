@@ -63,28 +63,37 @@ public class DialogGUI extends Screen {
     }
 
     private void renderEntity(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        int entityX = this.width / 2;
-        int entityY = this.height / 2 - 70;
-        float scale = 50.0F; // Увел
+        int entityX = this.width / 2 - 200;
+        int entityY = this.height / 2 + 30;
+        float scale = 50.0F;
 
+        // Получаем центр модели на экране
+        float centerX = entityX + (scale * 0.5f);
+        float centerY = entityY + (scale * 0.5f);
 
-        double deltaX = mouseX - entityX;
-        double deltaY = mouseY - entityY;
+        // Вычисляем разницу между курсором и центром
+        double deltaX = mouseX - centerX;
+        double deltaY = mouseY - centerY;
 
-        float targetYaw = (float) Math.toDegrees(Math.atan2(deltaY, deltaX)) - 90.0F;
-        float targetPitch = (float) Math.toDegrees(Math.atan2(deltaY, Math.sqrt(deltaX * deltaX + deltaY * deltaY))) * 0.5F;
+        // Корректировка углов
+        float targetYaw = (float) Math.toDegrees(Math.atan2(deltaX, deltaY)) - 180.0F;
+        float targetPitch = (float) -Math.toDegrees(Math.atan2(deltaY, deltaX)) * 0.7F; // Инверсия знака
 
-        targetYaw = Math.max(-90.0F, Math.min(90.0F, targetYaw));
+        // Плавная интерполяция
+        entityRotationYaw += (targetYaw - entityRotationYaw) * 0.3F;
+        entityRotationPitch += (targetPitch - entityRotationPitch) * 0.3F;
 
-        entityRotationYaw += (targetYaw - entityRotationYaw) * 0.1F;
-        entityRotationPitch += (targetPitch - entityRotationPitch) * 0.1F;
+        // Убираем ограничения для теста
+        // entityRotationPitch = Math.max(-45.0F, Math.min(45.0F, entityRotationPitch));
 
         poseStack.pushPose();
         poseStack.translate(entityX, entityY, 100.0);
         poseStack.scale(scale, scale, scale);
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(entityRotationYaw));
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(entityRotationPitch));
+
+        // Изменяем порядок поворотов
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(entityRotationPitch)); // Сначала pitch
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(entityRotationYaw)); // Затем yaw
 
         entityRenderer.setRenderShadow(false);
         entityRenderer.render(
