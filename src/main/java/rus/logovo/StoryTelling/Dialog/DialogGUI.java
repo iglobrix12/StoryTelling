@@ -14,7 +14,6 @@ import net.minecraft.world.level.Level;
 public class DialogGUI extends Screen {
     private final String question;
     private final Rest[] options;
-    private static Entity entity;
     private final EntityRenderDispatcher entityRenderer;
     private float entityRotationYaw = 0;
     private float entityRotationPitch = 0;
@@ -24,7 +23,6 @@ public class DialogGUI extends Screen {
         super(Component.literal("Dialog"));
         this.question = question;
         this.options = options != null ? options : new Rest[0];
-        // this.entity = entity;
         this.entityRenderer = Minecraft.getInstance().getEntityRenderDispatcher();
         this.level = Minecraft.getInstance().level;
     }
@@ -58,49 +56,7 @@ public class DialogGUI extends Screen {
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(poseStack);
         drawCenteredString(poseStack, this.font, question, this.width / 2, this.height / 2 - 40, 0xFFFFFF);
-        renderEntity(poseStack, mouseX, mouseY, partialTick); // Добавлен partialTick
         super.render(poseStack, mouseX, mouseY, partialTick);
-    }
-
-    private void renderEntity(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        int entityX = this.width / 2 - 200;
-        int entityY = this.height / 2 + 30;
-        float scale = 50.0F;
-
-        float centerX = entityX + (scale * 0.5f);
-        float centerY = entityY + (scale * 0.5f);
-
-        double deltaX = mouseX - centerX;
-        double deltaY = mouseY - centerY;
-
-        float targetYaw = (float) Math.toDegrees(Math.atan2(deltaX, deltaY)) - 180.0F;
-        float targetPitch = (float) -Math.toDegrees(Math.atan2(deltaY, deltaX)) * 0.7F; // Инверсия знака
-
-        entityRotationYaw += (targetYaw - entityRotationYaw) * 0.3F;
-        entityRotationPitch += (targetPitch - entityRotationPitch) * 0.3F;
-
-        // entityRotationPitch = Math.max(-45.0F, Math.min(45.0F, entityRotationPitch));
-
-        poseStack.pushPose();
-        poseStack.translate(entityX, entityY, 100.0);
-        poseStack.scale(scale, scale, scale);
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
-
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(entityRotationPitch));
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(entityRotationYaw));
-
-        entityRenderer.setRenderShadow(false);
-        entityRenderer.render(
-                entity,
-                0.0, 0.0, 0.0,
-                0.0F,
-                partialTick,
-                poseStack,
-                this.minecraft.renderBuffers().bufferSource(),
-                15728880
-        );
-        this.minecraft.renderBuffers().bufferSource().endBatch();
-        poseStack.popPose();
     }
 
     @Override
