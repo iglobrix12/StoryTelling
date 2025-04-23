@@ -14,17 +14,17 @@ import net.minecraft.world.level.Level;
 public class DialogGUI extends Screen {
     private final String question;
     private final Rest[] options;
-    private final Entity entity;
+    private static Entity entity;
     private final EntityRenderDispatcher entityRenderer;
     private float entityRotationYaw = 0;
     private float entityRotationPitch = 0;
     private final Level level;
 
-    public DialogGUI(String question, Rest[] options, Entity entity) {
+    public DialogGUI(String question, Rest[] options) {
         super(Component.literal("Dialog"));
         this.question = question;
         this.options = options != null ? options : new Rest[0];
-        this.entity = entity;
+        // this.entity = entity;
         this.entityRenderer = Minecraft.getInstance().getEntityRenderDispatcher();
         this.level = Minecraft.getInstance().level;
     }
@@ -67,23 +67,18 @@ public class DialogGUI extends Screen {
         int entityY = this.height / 2 + 30;
         float scale = 50.0F;
 
-        // Получаем центр модели на экране
         float centerX = entityX + (scale * 0.5f);
         float centerY = entityY + (scale * 0.5f);
 
-        // Вычисляем разницу между курсором и центром
         double deltaX = mouseX - centerX;
         double deltaY = mouseY - centerY;
 
-        // Корректировка углов
         float targetYaw = (float) Math.toDegrees(Math.atan2(deltaX, deltaY)) - 180.0F;
         float targetPitch = (float) -Math.toDegrees(Math.atan2(deltaY, deltaX)) * 0.7F; // Инверсия знака
 
-        // Плавная интерполяция
         entityRotationYaw += (targetYaw - entityRotationYaw) * 0.3F;
         entityRotationPitch += (targetPitch - entityRotationPitch) * 0.3F;
 
-        // Убираем ограничения для теста
         // entityRotationPitch = Math.max(-45.0F, Math.min(45.0F, entityRotationPitch));
 
         poseStack.pushPose();
@@ -91,9 +86,8 @@ public class DialogGUI extends Screen {
         poseStack.scale(scale, scale, scale);
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
 
-        // Изменяем порядок поворотов
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(entityRotationPitch)); // Сначала pitch
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(entityRotationYaw)); // Затем yaw
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(entityRotationPitch));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(entityRotationYaw));
 
         entityRenderer.setRenderShadow(false);
         entityRenderer.render(

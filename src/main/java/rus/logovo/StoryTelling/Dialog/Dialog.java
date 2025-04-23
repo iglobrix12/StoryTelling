@@ -12,9 +12,9 @@ public class Dialog {
         this.options = options;
     }
 
-    public void show(Entity entity) {
+    public void show() {
         Minecraft.getInstance().tell(() -> {
-            Minecraft.getInstance().setScreen(new DialogGUI(question, options,entity));
+            Minecraft.getInstance().setScreen(new DialogGUI(question, options));
         });
     }
 }

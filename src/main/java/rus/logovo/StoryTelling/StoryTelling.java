@@ -73,7 +73,7 @@ public class StoryTelling {
             });
             Zombie cow = new Zombie(EntityType.ZOMBIE,serverPlayer.level);
             cow.moveTo(new Vec3(0,-60,0));
-            dialog.show(cow);
+            dialog.show();
         }
     }
 }
